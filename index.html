@@ -23,13 +23,14 @@
     </style>
 </head>
 <body>
-    <h2>Làm sạch Content & Giữ thẻ HTML</h2>
+    <h2>Clean up hidden HTML code for Content SEO</h2>
     <div class="container">
         <p class="note">Lưu ý: Sau khi Copy, hãy dán vào tab "VĂN BẢN" (hoặc "MÃ") trong WordPress để giữ định dạng H2, H3, List...</p>
-        <textarea id="contentBox" placeholder="Dán nội dung từ ChatGPT, Google Docs vào đây..."></textarea>
+        <p class="note">Note: After copying, paste into the "Text" (or "Code") tab in WordPress to preserve formatting such as H2, H3, lists, etc.</p>
+        <textarea id="contentBox" placeholder="Paste content from Google Docs and AI Tools here..."></textarea>
         <div class="btn-group">
-            <button class="btn-clear" id="btn-clear">Xóa trắng</button>
-            <button class="btn-copy" id="btn-copy">Copy mã sạch</button>
+            <button class="btn-clear" id="btn-clear">New Content</button>
+            <button class="btn-copy" id="btn-copy">Copy the cleaned HTML code.</button>
         </div>
         <div id="status"></div>
     </div>
@@ -39,20 +40,16 @@
     </div>
 
     <script>
-        /* --- TÙY CHỌN: CHẶN XEM CODE (Đã tắt - Bỏ dấu // ở đầu để bật lại nếu muốn) --- */
         // document.addEventListener("contextmenu", e => e.preventDefault());
         // document.onkeydown = function(e) { if(123 == e.keyCode || (e.ctrlKey && e.shiftKey && (73 == e.keyCode || 67 == e.keyCode || 74 == e.keyCode)) || (e.ctrlKey && 85 == e.keyCode)) return false; };
         
-        /* --- LOGIC LÀM SẠCH VÀ GIỮ THẺ HTML --- */
         const contentBox = document.getElementById("contentBox");
 
         contentBox.addEventListener("paste", (e) => {
             e.preventDefault();
             
-            // Lấy dữ liệu HTML từ clipboard
             let html = e.clipboardData.getData("text/html");
             
-            // Nếu copy từ nguồn không có HTML (như Notepad), fallback về text thường
             if (!html) {
                 let plainText = e.clipboardData.getData("text/plain");
                 contentBox.value = plainText;
@@ -60,11 +57,9 @@
                 return;
             }
 
-            // Tạo DOM ảo để xử lý
             let div = document.createElement('div');
             div.innerHTML = html;
 
-            // Danh sách các thẻ được phép giữ lại (Đã xóa bỏ thẻ 'a' để xóa link)
             const allowedTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'br', 'strong', 'b', 'i', 'em', 'ul', 'ol', 'li'];
 
             function clean(node) {
@@ -81,20 +76,17 @@
                         // Node phần tử (Element node)
                         let tagName = child.tagName.toLowerCase();
                         
-                        // Chuẩn hóa thẻ b -> strong, i -> em cho chuẩn SEO WP
                         if (tagName === 'b') tagName = 'strong';
                         if (tagName === 'i') tagName = 'em';
 
                         let cleanContent = clean(child); // Đệ quy xử lý node con
 
                         if (allowedTags.includes(tagName)) {
-                            // Xử lý riêng cho thẻ rỗng <br> để tránh lỗi <br></br>
                             if (tagName === 'br') {
                                 result += `<br />`;
                                 continue;
                             }
 
-                            // Căn chỉnh khoảng cách (xuống dòng) cho mã HTML nhìn đẹp mắt hơn
                             if (['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol'].includes(tagName)) {
                                 result += `<${tagName}>${cleanContent}</${tagName}>\n\n`;
                             } else if (tagName === 'li') {
@@ -104,7 +96,6 @@
                                 result += `<${tagName}>${cleanContent}</${tagName}>`;
                             }
                         } else {
-                            // Nếu thẻ không được phép (bao gồm cả thẻ <a>), loại bỏ thẻ, CHỈ LẤY LẠI CHỮ BÊN TRONG
                             result += cleanContent;
                         }
                     }
@@ -114,14 +105,12 @@
 
             let cleaned = clean(div);
             
-            // Xóa bỏ khoảng trắng và dòng trống thừa
             cleaned = cleaned.replace(/\n{3,}/g, '\n\n').trim();
             
             contentBox.value = cleaned;
-            showStatus("Đã làm sạch, giữ định dạng và xóa toàn bộ link!", "green");
+            showStatus("Cleaned, formatting preserved, and all links removed!", "green");
         });
 
-        // Hàm hiển thị thông báo
         function showStatus(message, color) {
             const statusDiv = document.getElementById("status");
             statusDiv.innerText = message; 
