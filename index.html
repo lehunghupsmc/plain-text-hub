@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Công cụ Làm sạch Content - UnipharHub</title>
     <style>
-        body{font-family:Arial,sans-serif;background-color:#f4f7f6;padding:20px;max-width:900px;margin:auto;user-select:none;-webkit-user-select:none;}
+        body{font-family:Arial,sans-serif;background-color:#f4f7f6;padding:20px;max-width:900px;margin:auto;}
         h2{text-align:center;color:#333;margin-bottom:10px;}
         .container{background:#fff;padding:20px;border-radius:8px;box-shadow:0 4px 6px rgba(0,0,0,0.1);}
         textarea{width:100%;height:400px;padding:15px;border:2px solid #ddd;border-radius:5px;font-size:15px;font-family:Consolas,monaco,monospace;resize:vertical;box-sizing:border-box;line-height:1.5;background-color:#fafafa;}
@@ -28,8 +28,8 @@
         <p class="note">Lưu ý: Sau khi Copy, hãy dán vào tab "VĂN BẢN" (hoặc "MÃ") trong WordPress để giữ định dạng H2, H3, List...</p>
         <textarea id="contentBox" placeholder="Dán nội dung từ ChatGPT, Google Docs vào đây..."></textarea>
         <div class="btn-group">
-            <button class="btn-clear" id="b1">Xóa trắng</button>
-            <button class="btn-copy" id="b2">Copy mã sạch</button>
+            <button class="btn-clear" id="btn-clear">Xóa trắng</button>
+            <button class="btn-copy" id="btn-copy">Copy mã sạch</button>
         </div>
         <div id="status"></div>
     </div>
@@ -39,24 +39,33 @@
     </div>
 
     <script>
-        /* --- BẢO MẬT: CHẶN XEM CODE --- */
-        document.addEventListener("contextmenu",e=>e.preventDefault());
-        document.onkeydown=function(e){if(123==e.keyCode||(e.ctrlKey&&e.shiftKey&&(73==e.keyCode||67==e.keyCode||74==e.keyCode))||(e.ctrlKey&&85==e.keyCode))return!1};
+        /* --- TÙY CHỌN: CHẶN XEM CODE (Đã tắt - Bỏ dấu // ở đầu để bật lại nếu muốn) --- */
+        // document.addEventListener("contextmenu", e => e.preventDefault());
+        // document.onkeydown = function(e) { if(123 == e.keyCode || (e.ctrlKey && e.shiftKey && (73 == e.keyCode || 67 == e.keyCode || 74 == e.keyCode)) || (e.ctrlKey && 85 == e.keyCode)) return false; };
         
         /* --- LOGIC LÀM SẠCH VÀ GIỮ THẺ HTML --- */
-        const _0x4f2a = ["getElementById", "contentBox", "addEventListener", "paste", "preventDefault", "clipboardData", "getData", "text/html", "text/plain", "value", "Đã làm sạch và giữ lại định dạng chuẩn!", "green", "status", "innerText", "style", "color", "b1", "b2", "click", "writeText", "Đã copy!", "red"];
-        const cb = document[_0x4f2a[0]](_0x4f2a[1]);
+        const contentBox = document.getElementById("contentBox");
 
-        cb[_0x4f2a[2]](_0x4f2a[3], (e) => {
-            e[_0x4f2a[4]]();
-            let html = e[_0x4f2a[5]][_0x4f2a[6]](_0x4f2a[7]) || e[_0x4f2a[5]][_0x4f2a[6]](_0x4f2a[8]);
+        contentBox.addEventListener("paste", (e) => {
+            e.preventDefault();
             
-            // Tạo một trình giải mã tạm thời
+            // Lấy dữ liệu HTML từ clipboard
+            let html = e.clipboardData.getData("text/html");
+            
+            // Nếu copy từ nguồn không có HTML (như Notepad), fallback về text thường
+            if (!html) {
+                let plainText = e.clipboardData.getData("text/plain");
+                contentBox.value = plainText;
+                showStatus("Đã dán văn bản thuần túy!", "green");
+                return;
+            }
+
+            // Tạo DOM ảo để xử lý
             let div = document.createElement('div');
             div.innerHTML = html;
 
-            // Danh sách các thẻ được phép giữ lại
-            const allowedTags = ['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'P', 'BR', 'STRONG', 'B', 'I', 'EM', 'UL', 'OL', 'LI', 'A'];
+            // Danh sách các thẻ được phép giữ lại (Đã xóa bỏ thẻ 'a' để xóa link)
+            const allowedTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'br', 'strong', 'b', 'i', 'em', 'ul', 'ol', 'li'];
 
             function clean(node) {
                 let result = "";
@@ -65,23 +74,37 @@
                 for (let i = 0; i < children.length; i++) {
                     let child = children[i];
                     
-                    if (child.nodeType === 3) { // Text node
+                    if (child.nodeType === 3) { 
+                        // Node văn bản (Text node)
                         result += child.textContent;
-                    } else if (child.nodeType === 1) { // Element node
-                        let tagName = child.tagName;
-                        let cleanContent = clean(child);
+                    } else if (child.nodeType === 1) { 
+                        // Node phần tử (Element node)
+                        let tagName = child.tagName.toLowerCase();
+                        
+                        // Chuẩn hóa thẻ b -> strong, i -> em cho chuẩn SEO WP
+                        if (tagName === 'b') tagName = 'strong';
+                        if (tagName === 'i') tagName = 'em';
+
+                        let cleanContent = clean(child); // Đệ quy xử lý node con
 
                         if (allowedTags.includes(tagName)) {
-                            let tag = tagName.toLowerCase();
-                            let attrs = "";
-                            if (tag === 'a' && child.hasAttribute('href')) {
-                                attrs = ` href="${child.getAttribute('href')}" target="_blank"`;
+                            // Xử lý riêng cho thẻ rỗng <br> để tránh lỗi <br></br>
+                            if (tagName === 'br') {
+                                result += `<br />`;
+                                continue;
                             }
-                            // Thêm xuống dòng sau các block element để không bị dính
-                            let suffix = (['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li'].includes(tag)) ? "\n\n" : "";
-                            result += `<${tag}${attrs}>${cleanContent}</${tag}>${suffix}`;
+
+                            // Căn chỉnh khoảng cách (xuống dòng) cho mã HTML nhìn đẹp mắt hơn
+                            if (['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol'].includes(tagName)) {
+                                result += `<${tagName}>${cleanContent}</${tagName}>\n\n`;
+                            } else if (tagName === 'li') {
+                                result += `  <${tagName}>${cleanContent}</${tagName}>\n`;
+                            } else {
+                                // Các thẻ inline (strong, em)
+                                result += `<${tagName}>${cleanContent}</${tagName}>`;
+                            }
                         } else {
-                            // Nếu thẻ không nằm trong danh sách, chỉ lấy nội dung bên trong
+                            // Nếu thẻ không được phép (bao gồm cả thẻ <a>), loại bỏ thẻ, CHỈ LẤY LẠI CHỮ BÊN TRONG
                             result += cleanContent;
                         }
                     }
@@ -90,22 +113,38 @@
             }
 
             let cleaned = clean(div);
-            // Fix lỗi xuống dòng thừa
+            
+            // Xóa bỏ khoảng trắng và dòng trống thừa
             cleaned = cleaned.replace(/\n{3,}/g, '\n\n').trim();
-            cb[_0x4f2a[9]] = cleaned;
-            showStatus(_0x4f2a[10], _0x4f2a[11]);
+            
+            contentBox.value = cleaned;
+            showStatus("Đã làm sạch, giữ định dạng và xóa toàn bộ link!", "green");
         });
 
-        function showStatus(m, c) {
-            const s = document[_0x4f2a[0]](_0x4f2a[12]);
-            s[_0x4f2a[13]] = m; s[_0x4f2a[14]][_0x4f2a[15]] = c;
-            if (c === _0x4f2a[11]) setTimeout(() => s[_0x4f2a[13]] = "", 3000);
+        // Hàm hiển thị thông báo
+        function showStatus(message, color) {
+            const statusDiv = document.getElementById("status");
+            statusDiv.innerText = message; 
+            statusDiv.style.color = color;
+            if (color === "green") {
+                setTimeout(() => statusDiv.innerText = "", 3000);
+            }
         }
 
-        document[_0x4f2a[0]](_0x4f2a[16])[_0x4f2a[2]](_0x4f2a[18], () => { cb[_0x4f2a[9]] = ""; showStatus("", ""); });
-        document[_0x4f2a[0]](_0x4f2a[17])[_0x4f2a[2]](_0x4f2a[18], () => {
-            if (cb[_0x4f2a[9]]) {
-                navigator.clipboard[_0x4f2a[19]](cb[_0x4f2a[9]]).then(() => showStatus(_0x4f2a[20], _0x4f2a[11]));
+        // Nút Xóa
+        document.getElementById("btn-clear").addEventListener("click", () => { 
+            contentBox.value = ""; 
+            showStatus("", ""); 
+        });
+
+        // Nút Copy
+        document.getElementById("btn-copy").addEventListener("click", () => {
+            if (contentBox.value) {
+                navigator.clipboard.writeText(contentBox.value).then(() => {
+                    showStatus("Đã copy thành công!", "green");
+                });
+            } else {
+                showStatus("Không có nội dung để copy!", "red");
             }
         });
     </script>
