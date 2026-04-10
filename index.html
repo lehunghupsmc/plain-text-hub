@@ -6,59 +6,74 @@
     <title>Công cụ Làm sạch Content</title>
     <style>
         body{font-family:Arial,sans-serif;background-color:#f4f7f6;padding:20px;max-width:800px;margin:auto;user-select:none;-webkit-user-select:none;}
-        h2{text-align:center;color:#333;}
+        h2{text-align:center;color:#333;margin-bottom:10px;}
         .container{background:#fff;padding:20px;border-radius:8px;box-shadow:0 4px 6px rgba(0,0,0,0.1);}
-        textarea{width:100%;height:300px;padding:15px;border:2px solid #ddd;border-radius:5px;font-size:16px;resize:vertical;box-sizing:border-box;line-height:1.6;}
+        textarea{width:100%;height:350px;padding:15px;border:2px solid #ddd;border-radius:5px;font-size:16px;resize:vertical;box-sizing:border-box;line-height:1.6;background-color:#fff;}
         textarea:focus{border-color:#007cba;outline:none;}
         .btn-group{display:flex;justify-content:space-between;margin-top:15px;}
-        button{padding:10px 20px;font-size:16px;border:none;border-radius:5px;cursor:pointer;font-weight:bold;transition:0.3s;}
-        .btn-copy{background-color:#007cba;color:white;}
+        button{padding:12px 25px;font-size:16px;border:none;border-radius:5px;cursor:pointer;font-weight:bold;transition:0.3s;}
+        .btn-copy{background-color:#007cba;color:white;flex-grow:1;margin-left:10px;}
         .btn-copy:hover{background-color:#005a87;}
         .btn-clear{background-color:#dc3232;color:white;}
         .btn-clear:hover{background-color:#a42828;}
         #status{text-align:center;margin-top:15px;color:green;font-weight:bold;min-height:20px;}
-        
-        /* CSS cho phần Bản quyền */
-        .footer {
-            text-align: center;
-            margin-top: 25px;
-            font-size: 14px;
-            color: #666;
-        }
-        .footer a {
-            color: #007cba;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        .footer a:hover {
-            text-decoration: underline;
-        }
+        .footer{text-align:center;margin-top:25px;font-size:14px;color:#666;}
+        .footer a{color:#007cba;text-decoration:none;font-weight:bold;}
+        .footer a:hover{text-decoration:underline;}
     </style>
 </head>
 <body>
-    <h2>Làm sạch Code & Chuẩn hóa Dòng</h2>
+    <h2>Làm sạch Content WordPress</h2>
     <div class="container">
-        <p><i>Hướng dẫn: Paste (Ctrl+V) bài viết vào ô bên dưới. Tool sẽ tự động làm sạch code ẩn và căn chỉnh dòng chuẩn.</i></p>
-        <textarea id="contentBox" placeholder="Paste nội dung vào đây..."></textarea>
+        <p style="font-size:14px; color:#555;"><i>Hướng dẫn: Dán nội dung vào ô dưới. Tool sẽ tự động xóa code ẩn và tạo khoảng cách dòng chuẩn cho WordPress.</i></p>
+        <textarea id="contentBox" placeholder="Dán nội dung từ ChatGPT, Google Docs hoặc Web tại đây..."></textarea>
         <div class="btn-group">
             <button class="btn-clear" id="b1">Xóa trắng</button>
-            <button class="btn-copy" id="b2">Copy để dán vào WP</button>
+            <button class="btn-copy" id="b2">Copy nội dung đã làm sạch</button>
         </div>
         <div id="status"></div>
     </div>
 
-    <!-- Phần Bản quyền -->
     <div class="footer">
         © 2026 UnipharHub • Created by <a href="https://www.facebook.com/lemanhhunghup/" target="_blank">@lehunghup</a>
     </div>
 
     <script>
-        /* --- CHẶN XEM CODE --- */
+        /* --- BẢO MẬT: CHẶN XEM CODE --- */
         document.addEventListener("contextmenu",e=>e.preventDefault());
         document.onkeydown=function(e){if(123==e.keyCode||(e.ctrlKey&&e.shiftKey&&(73==e.keyCode||67==e.keyCode||74==e.keyCode))||(e.ctrlKey&&85==e.keyCode))return!1};
         
-        /* --- LOGIC ĐÃ ĐƯỢC LÀM RỐI --- */
-        const _0x1a2b=["getElementById","contentBox","addEventListener","paste","preventDefault","clipboardData","getData","text/plain","replace","\x0a","trim","split","map","join","value","Chưa\x20có\x20nội\x20dung\x20để\x20copy!","red","writeText","Đã\x20copy\x20nội\x20dung\x20sạch!\x20Hãy\x20dán\x20vào\x20WordPress.","green","Lỗi\x20khi\x20copy:\x20","status","style","color","innerText","setTimeout","b1","b2","click"];const _0x3f1c=function(_0x5c8a){return _0x1a2b[_0x5c8a]};const cb=document[_0x3f1c(0)](_0x3f1c(1));cb[_0x3f1c(2)](_0x3f1c(3),_0x5c8a=>{_0x5c8a[_0x3f1c(4)]();let _0x2c4e=(_0x5c8a.originalEvent||_0x5c8a)[_0x3f1c(5)][_0x3f1c(6)](_0x3f1c(7));_0x2c4e=_0x2c4e[_0x3f1c(8)](/\r\n/g,_0x3f1c(9))[_0x3f1c(8)](/\r/g,_0x3f1c(9));_0x2c4e=_0x2c4e[_0x3f1c(11)](_0x3f1c(9))[_0x3f1c(12)](_0x4b7f=>_0x4b7f[_0x3f1c(10)]())[_0x3f1c(13)](_0x3f1c(9));_0x2c4e=_0x2c4e[_0x3f1c(8)](/\n{2,}/g,"\x0a\x0a");cb[_0x3f1c(14)]=_0x2c4e});function copyToClipboard(){if(""===cb[_0x3f1c(14)][_0x3f1c(10)]()){showStatus(_0x3f1c(15),_0x3f1c(16));return}navigator.clipboard[_0x3f1c(17)](cb[_0x3f1c(14)]).then(()=>{showStatus(_0x3f1c(18),_0x3f1c(19))}).catch(_0x5c8a=>{showStatus(_0x3f1c(20)+_0x5c8a,_0x3f1c(16))})}function clearText(){cb[_0x3f1c(14)]="";showStatus("")}function showStatus(_0x5c8a,_0x2c4e){const _0x4b7f=document[_0x3f1c(0)](_0x3f1c(21));_0x4b7f[_0x3f1c(22)][_0x3f1c(23)]=_0x2c4e;_0x4b7f[_0x3f1c(24)]=_0x5c8a;if(_0x3f1c(19)===_0x2c4e){window[_0x3f1c(25)](()=>_0x4b7f[_0x3f1c(24)]="",3e3)}}document[_0x3f1c(0)](_0x3f1c(26))[_0x3f1c(2)](_0x3f1c(28),clearText);document[_0x3f1c(0)](_0x3f1c(27))[_0x3f1c(2)](_0x3f1c(28),copyToClipboard);
+        /* --- LOGIC XỬ LÝ DÒNG (ĐÃ CẢI TIẾN) --- */
+        const _0x1a2b=["getElementById","contentBox","addEventListener","paste","preventDefault","clipboardData","getData","text/plain","replace","\x0a","trim","split","filter","join","value","Chưa\x20có\x20nội\x20dung!","red","writeText","Đã\x20làm\x20sạch\x20và\x20Copy!","green","Lỗi:\x20","status","style","color","innerText","setTimeout","b1","b2","click"];const _0x3f1c=function(_0x5c8a){return _0x1a2b[_0x5c8a]};const cb=document[_0x3f1c(0)](_0x3f1c(1));
+
+        cb[_0x3f1c(2)](_0x3f1c(3),_0x5c8a=>{
+            _0x5c8a[_0x3f1c(4)]();
+            // Lấy text thuần
+            let t=(_0x5c8a.originalEvent||_0x5c8a)[_0x3f1c(5)][_0x3f1c(6)](_0x3f1c(7));
+            
+            // Bước 1: Chuẩn hóa xuống dòng về \n
+            t=t[_0x3f1c(8)](/\r\n/g,"\n")[_0x3f1c(8)](/\r/g,"\n");
+
+            // Bước 2: Tách từng dòng, xóa khoảng trắng thừa đầu cuối, bỏ dòng trống cũ
+            let lines=t[_0x3f1c(11)]("\n")[_0x3f1c(12)](l=>l[_0x3f1c(10)]()!=="");
+
+            // Bước 3: Nối lại với 2 dấu xuống dòng (\n\n) để tạo khoảng cách Paragraph cho WP
+            cb[_0x3f1c(14)]=lines[_0x3f1c(13)]("\n\n");
+            
+            showStatus("Đã xử lý xong! Hãy bấm Copy.", _0x3f1c(19));
+        });
+
+        function copyToClipboard(){
+            if(cb[_0x3f1c(14)][_0x3f1c(10)]()===""){showStatus(_0x3f1c(15),_0x3f1c(16));return}
+            navigator.clipboard[_0x3f1c(17)](cb[_0x3f1c(14)]).then(()=>{
+                showStatus(_0x3f1c(18),_0x3f1c(19))
+            }).catch(e=>{showStatus(_0x3f1c(20)+e,_0x3f1c(16))})
+        }
+
+        function clearText(){cb[_0x3f1c(14)]="";showStatus("")}
+        function showStatus(_0x5c8a,_0x2c4e){const s=document[_0x3f1c(0)](_0x3f1c(21));s[_0x3f1c(22)][_0x3f1c(23)]=_0x2c4e;s[_0x3f1c(24)]=_0x5c8a;if(_0x2c4e===_0x3f1c(19)){window[_0x3f1c(25)](()=>s[_0x3f1c(24)]="",3e3)}}
+        document[_0x3f1c(0)](_0x3f1c(26))[_0x3f1c(2)](_0x3f1c(28),clearText);
+        document[_0x3f1c(0)](_0x3f1c(27))[_0x3f1c(2)](_0x3f1c(28),copyToClipboard);
     </script>
 </body>
 </html>
