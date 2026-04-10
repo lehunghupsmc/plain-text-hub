@@ -29,8 +29,8 @@
         <p class="note">Note: After copying, paste into the "Text" (or "Code") tab in WordPress to preserve formatting such as H2, H3, lists, etc.</p>
         <textarea id="contentBox" placeholder="Paste content from Google Docs and AI Tools here..."></textarea>
         <div class="btn-group">
-            <button class="btn-clear" id="btn-clear">New Content</button>
-            <button class="btn-copy" id="btn-copy">Copy the cleaned HTML code.</button>
+            <button class="btn-clear" id="btn-clear">New content</button>
+            <button class="btn-copy" id="btn-copy">Copy the cleaned HTML code</button>
         </div>
         <div id="status"></div>
     </div>
@@ -53,7 +53,7 @@
             if (!html) {
                 let plainText = e.clipboardData.getData("text/plain");
                 contentBox.value = plainText;
-                showStatus("Đã dán văn bản thuần túy!", "green");
+                showStatus("This is plain text", "green");
                 return;
             }
 
@@ -130,10 +130,10 @@
         document.getElementById("btn-copy").addEventListener("click", () => {
             if (contentBox.value) {
                 navigator.clipboard.writeText(contentBox.value).then(() => {
-                    showStatus("Đã copy thành công!", "green");
+                    showStatus("Copied!", "green");
                 });
             } else {
-                showStatus("Không có nội dung để copy!", "red");
+                showStatus("No content to copy", "red");
             }
         });
     </script>
