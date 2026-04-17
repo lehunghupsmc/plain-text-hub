@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HTML code Cleaning Hub - UnipharHub</title>
     <style>
-        body{font-family:Arial,sans-serif;background-color:#f4f7f6;padding:20px;max-width:900px;margin:auto;}
+        body{font-family:Arial,sans-serif;background-color:#f4f7f6;padding:20px;max-width:900px;margin:auto;user-select:none;-webkit-user-select:none;}
         h2{text-align:center;color:#333;margin-bottom:10px;}
         .container{background:#fff;padding:20px;border-radius:8px;box-shadow:0 4px 6px rgba(0,0,0,0.1);}
         textarea{width:100%;height:400px;padding:15px;border:2px solid #ddd;border-radius:5px;font-size:15px;font-family:Consolas,monaco,monospace;resize:vertical;box-sizing:border-box;line-height:1.5;background-color:#fafafa;}
@@ -40,8 +40,9 @@
     </div>
 
     <script>
-        // document.addEventListener("contextmenu", e => e.preventDefault());
-        // document.onkeydown = function(e) { if(123 == e.keyCode || (e.ctrlKey && e.shiftKey && (73 == e.keyCode || 67 == e.keyCode || 74 == e.keyCode)) || (e.ctrlKey && 85 == e.keyCode)) return false; };
+        /* Bật lại bảo mật nếu cần */
+        document.addEventListener("contextmenu", e => e.preventDefault());
+        document.onkeydown = function(e) { if(123 == e.keyCode || (e.ctrlKey && e.shiftKey && (73 == e.keyCode || 67 == e.keyCode || 74 == e.keyCode)) || (e.ctrlKey && 85 == e.keyCode)) return false; };
         
         const contentBox = document.getElementById("contentBox");
 
@@ -70,32 +71,44 @@
                     let child = children[i];
                     
                     if (child.nodeType === 3) { 
-                        // Node văn bản (Text node)
+                        // Node văn bản
                         result += child.textContent;
                     } else if (child.nodeType === 1) { 
-                        // Node phần tử (Element node)
+                        // Node phần tử
                         let tagName = child.tagName.toLowerCase();
-                        
-                        if (tagName === 'b') tagName = 'strong';
-                        if (tagName === 'i') tagName = 'em';
+                        let cleanContent = clean(child);
 
-                        let cleanContent = clean(child); // Đệ quy xử lý node con
+                        // KIỂM TRA ĐỊNH DẠNG TRONG STYLE (Fix cho Google Docs)
+                        let isBold = child.style.fontWeight === 'bold' || parseInt(child.style.fontWeight) >= 700;
+                        let isItalic = child.style.fontStyle === 'italic';
+
+                        if (isBold && !['strong', 'b'].includes(tagName)) {
+                            cleanContent = `<strong>${cleanContent}</strong>`;
+                        }
+                        if (isItalic && !['em', 'i'].includes(tagName)) {
+                            cleanContent = `<em>${cleanContent}</em>`;
+                        }
 
                         if (allowedTags.includes(tagName)) {
                             if (tagName === 'br') {
                                 result += `<br />`;
                                 continue;
                             }
+                            
+                            // Đổi b thành strong, i thành em cho chuẩn SEO
+                            let finalTag = tagName;
+                            if (tagName === 'b') finalTag = 'strong';
+                            if (tagName === 'i') finalTag = 'em';
 
-                            if (['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol'].includes(tagName)) {
-                                result += `<${tagName}>${cleanContent}</${tagName}>\n\n`;
-                            } else if (tagName === 'li') {
-                                result += `  <${tagName}>${cleanContent}</${tagName}>\n`;
+                            if (['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol'].includes(finalTag)) {
+                                result += `<${finalTag}>${cleanContent}</${finalTag}>\n\n`;
+                            } else if (finalTag === 'li') {
+                                result += `  <li>${cleanContent}</li>\n`;
                             } else {
-                                // Các thẻ inline (strong, em)
-                                result += `<${tagName}>${cleanContent}</${tagName}>`;
+                                result += `<${finalTag}>${cleanContent}</${finalTag}>`;
                             }
                         } else {
+                            // Nếu thẻ không nằm trong list (như span, div) nhưng có chứa nội dung đã xử lý bold/italic
                             result += cleanContent;
                         }
                     }
@@ -105,10 +118,11 @@
 
             let cleaned = clean(div);
             
+            // Làm sạch khoảng trống thừa
             cleaned = cleaned.replace(/\n{3,}/g, '\n\n').trim();
             
             contentBox.value = cleaned;
-            showStatus("Cleaned, formatting preserved, and all links removed!", "green");
+            showStatus("Cleaned! Bold & Italic preserved from Google Docs.", "green");
         });
 
         function showStatus(message, color) {
@@ -120,13 +134,11 @@
             }
         }
 
-        // Nút Xóa
         document.getElementById("btn-clear").addEventListener("click", () => { 
             contentBox.value = ""; 
             showStatus("", ""); 
         });
 
-        // Nút Copy
         document.getElementById("btn-copy").addEventListener("click", () => {
             if (contentBox.value) {
                 navigator.clipboard.writeText(contentBox.value).then(() => {
