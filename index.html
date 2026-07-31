@@ -8,31 +8,73 @@
         body{font-family:Arial,sans-serif;background-color:#f4f7f6;padding:20px;max-width:900px;margin:auto;user-select:none;-webkit-user-select:none;}
         h2{text-align:center;color:#333;margin-bottom:10px;}
         .container{background:#fff;padding:20px;border-radius:8px;box-shadow:0 4px 6px rgba(0,0,0,0.1);}
-        textarea{width:100%;height:400px;padding:15px;border:2px solid #ddd;border-radius:5px;font-size:15px;font-family:Consolas,monaco,monospace;resize:vertical;box-sizing:border-box;line-height:1.5;background-color:#fafafa;}
+        .tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;padding:5px;background:#eef2f4;border-radius:8px;}
+        .tab-button{padding:12px 16px;background:transparent;color:#555;border:0;border-radius:6px;}
+        .tab-button:hover{background:#dde6ea;}
+        .tab-button[aria-selected="true"]{background:#007cba;color:#fff;box-shadow:0 2px 4px rgba(0,0,0,0.12);}
+        .tab-panel[hidden]{display:none;}
+        textarea{width:100%;height:400px;padding:15px;border:2px solid #ddd;border-radius:5px;font-size:15px;font-family:Consolas,monaco,monospace;resize:vertical;box-sizing:border-box;line-height:1.5;background-color:#fafafa;user-select:text;-webkit-user-select:text;}
         textarea:focus{border-color:#007cba;outline:none;background-color:#fff;}
+        .html-textarea{height:230px;}
+        .field-label{display:block;margin:14px 0 7px;color:#333;font-size:14px;font-weight:bold;}
         .btn-group{display:flex;justify-content:space-between;margin-top:15px;}
         button{padding:12px 25px;font-size:16px;border:none;border-radius:5px;cursor:pointer;font-weight:bold;transition:0.3s;}
         .btn-copy{background-color:#007cba;color:white;flex-grow:1;margin-left:10px;}
         .btn-copy:hover{background-color:#005a87;}
+        .btn-group .btn-copy:only-child{margin-left:0;}
+        .btn-clean{background-color:#198754;color:white;flex-grow:1;margin-left:10px;}
+        .btn-clean:hover{background-color:#146c43;}
         .btn-clear{background-color:#dc3232;color:white;}
         .btn-clear:hover{background-color:#a42828;}
-        #status{text-align:center;margin-top:15px;color:green;font-weight:bold;min-height:20px;}
+        .status{text-align:center;margin-top:15px;color:green;font-weight:bold;min-height:20px;}
         .note{font-size:13px; color:#d63638; margin-bottom:10px; font-weight:bold;}
+        .html-note{color:#555;font-weight:normal;line-height:1.5;}
         .footer{text-align:center;margin-top:25px;font-size:14px;color:#666;}
         .footer a{color:#007cba;text-decoration:none;font-weight:bold;}
+        @media (max-width:600px){
+            body{padding:10px;}
+            .container{padding:14px;}
+            .btn-group{flex-direction:column;gap:10px;}
+            .btn-copy,.btn-clean{margin-left:0;}
+            button{width:100%;}
+        }
     </style>
 </head>
 <body>
     <h2>Clean up hidden HTML code for Content SEO</h2>
     <div class="container">
-        <p class="note">Lưu ý: Sau khi Copy, hãy dán vào tab "VĂN BẢN" (hoặc "MÃ") trong WordPress để giữ định dạng H2, H3, List...</p>
-        <p class="note">Note: After copying, paste into the "Text" (or "Code") tab in WordPress to preserve formatting such as H2, H3, lists, etc.</p>
-        <textarea id="contentBox" placeholder="Paste content from Google Docs and AI Tools here..."></textarea>
-        <div class="btn-group">
-            <button class="btn-clear" id="btn-clear">New content</button>
-            <button class="btn-copy" id="btn-copy">Copy the cleaned HTML code</button>
+        <div class="tabs" role="tablist" aria-label="Cleaning mode">
+            <button class="tab-button" id="tab-rich-text" type="button" role="tab" aria-selected="true" aria-controls="panel-rich-text">1. VĂN BẢN</button>
+            <button class="tab-button" id="tab-html-code" type="button" role="tab" aria-selected="false" aria-controls="panel-html-code" tabindex="-1">2. MÃ HTML</button>
         </div>
-        <div id="status"></div>
+
+        <section class="tab-panel" id="panel-rich-text" role="tabpanel" aria-labelledby="tab-rich-text">
+            <p class="note">Lưu ý: Sau khi Copy, hãy dán vào tab "VĂN BẢN" (hoặc "MÃ") trong WordPress để giữ định dạng H2, H3, List...</p>
+            <p class="note">Note: After copying, paste into the "Text" (or "Code") tab in WordPress to preserve formatting such as H2, H3, lists, etc.</p>
+            <label class="field-label" for="contentBox">Văn bản từ Google Docs, AI Tools hoặc WordPress Visual Editor</label>
+            <textarea id="contentBox" placeholder="Paste content from Google Docs and AI Tools here..."></textarea>
+            <div class="btn-group">
+                <button class="btn-clear" id="btn-clear" type="button">New content</button>
+                <button class="btn-copy" id="btn-copy" type="button">Copy the cleaned HTML code</button>
+            </div>
+            <div class="status" id="status" role="status" aria-live="polite"></div>
+        </section>
+
+        <section class="tab-panel" id="panel-html-code" role="tabpanel" aria-labelledby="tab-html-code" hidden>
+            <p class="note html-note">Dán mã HTML từ WordPress Code Editor vào ô bên dưới, sau đó bấm “Làm sạch mã HTML”. Mã gốc vẫn được giữ để bạn đối chiếu; cấu trúc bảng và các ô gộp cũng được bảo toàn.</p>
+            <label class="field-label" for="htmlCodeInput">Mã HTML gốc</label>
+            <textarea class="html-textarea" id="htmlCodeInput" spellcheck="false" placeholder="Dán mã HTML từ WordPress vào đây..."></textarea>
+            <div class="btn-group">
+                <button class="btn-clear" id="btn-html-clear" type="button">Nội dung mới</button>
+                <button class="btn-clean" id="btn-html-clean" type="button">Làm sạch mã HTML</button>
+            </div>
+            <label class="field-label" for="htmlCodeOutput">Mã HTML đã làm sạch</label>
+            <textarea class="html-textarea" id="htmlCodeOutput" spellcheck="false" readonly placeholder="Kết quả làm sạch sẽ xuất hiện ở đây..."></textarea>
+            <div class="btn-group">
+                <button class="btn-copy" id="btn-html-copy" type="button">Copy mã HTML đã làm sạch</button>
+            </div>
+            <div class="status" id="html-status" role="status" aria-live="polite"></div>
+        </section>
     </div>
 
     <div class="footer">
@@ -45,6 +87,32 @@
         document.onkeydown = function(e) { if(123 == e.keyCode || (e.ctrlKey && e.shiftKey && (73 == e.keyCode || 67 == e.keyCode || 74 == e.keyCode)) || (e.ctrlKey && 85 == e.keyCode)) return false; };
         
         const contentBox = document.getElementById("contentBox");
+        const tabButtons = Array.from(document.querySelectorAll('[role="tab"]'));
+
+        function activateTab(selectedTab) {
+            tabButtons.forEach((tab) => {
+                const isSelected = tab === selectedTab;
+                tab.setAttribute("aria-selected", isSelected.toString());
+                tab.tabIndex = isSelected ? 0 : -1;
+                document.getElementById(tab.getAttribute("aria-controls")).hidden = !isSelected;
+            });
+        }
+
+        tabButtons.forEach((tab, index) => {
+            tab.addEventListener("click", () => activateTab(tab));
+            tab.addEventListener("keydown", (e) => {
+                let nextIndex = index;
+                if (e.key === "ArrowRight") nextIndex = (index + 1) % tabButtons.length;
+                if (e.key === "ArrowLeft") nextIndex = (index - 1 + tabButtons.length) % tabButtons.length;
+                if (e.key === "Home") nextIndex = 0;
+                if (e.key === "End") nextIndex = tabButtons.length - 1;
+                if (nextIndex !== index) {
+                    e.preventDefault();
+                    activateTab(tabButtons[nextIndex]);
+                    tabButtons[nextIndex].focus();
+                }
+            });
+        });
 
         contentBox.addEventListener("paste", (e) => {
             e.preventDefault();
@@ -125,8 +193,8 @@
             showStatus("Cleaned! Bold & Italic preserved from Google Docs.", "green");
         });
 
-        function showStatus(message, color) {
-            const statusDiv = document.getElementById("status");
+        function showStatus(message, color, statusId = "status") {
+            const statusDiv = document.getElementById(statusId);
             statusDiv.innerText = message; 
             statusDiv.style.color = color;
             if (color === "green") {
@@ -143,10 +211,172 @@
             if (contentBox.value) {
                 navigator.clipboard.writeText(contentBox.value).then(() => {
                     showStatus("Copied!", "green");
+                }).catch(() => {
+                    showStatus("Unable to copy. Please select and copy manually.", "red");
                 });
             } else {
                 showStatus("No content to copy", "red");
             }
+        });
+
+        const htmlCodeInput = document.getElementById("htmlCodeInput");
+        const htmlCodeOutput = document.getElementById("htmlCodeOutput");
+        const htmlAllowedTags = [
+            'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+            'p', 'br', 'strong', 'b', 'i', 'em', 'ul', 'ol', 'li',
+            'table', 'caption', 'colgroup', 'col', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td'
+        ];
+        const htmlBlockedTags = ['script', 'style', 'iframe', 'object', 'embed', 'svg', 'math', 'template', 'noscript', 'head', 'meta', 'link', 'title', 'base'];
+
+        function escapeHtmlText(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+        }
+
+        function getSafeTableAttributes(element, tagName) {
+            const safeAttributes = [];
+
+            function preserveNumericAttribute(name, minimum) {
+                const value = element.getAttribute(name);
+
+                if (value === null || !/^\d{1,4}$/.test(value)) {
+                    return;
+                }
+
+                const numericValue = Number(value);
+                if (numericValue >= minimum && numericValue <= 1000) {
+                    safeAttributes.push(`${name}="${numericValue}"`);
+                }
+            }
+
+            if (["th", "td"].includes(tagName)) {
+                preserveNumericAttribute("colspan", 1);
+                preserveNumericAttribute("rowspan", 0);
+            }
+
+            if (["col", "colgroup"].includes(tagName)) {
+                preserveNumericAttribute("span", 1);
+            }
+
+            if (tagName === "th") {
+                const scope = element.getAttribute("scope");
+                if (["row", "col", "rowgroup", "colgroup"].includes(scope)) {
+                    safeAttributes.push(`scope="${scope}"`);
+                }
+            }
+
+            return safeAttributes.length ? ` ${safeAttributes.join(" ")}` : "";
+        }
+
+        function cleanHtmlCode(sourceHtml) {
+            const template = document.createElement("template");
+            template.innerHTML = sourceHtml;
+
+            function cleanHtmlNode(node) {
+                let result = "";
+
+                for (const child of node.childNodes) {
+                    if (child.nodeType === Node.TEXT_NODE) {
+                        result += escapeHtmlText(child.textContent);
+                        continue;
+                    }
+
+                    if (child.nodeType !== Node.ELEMENT_NODE) {
+                        continue;
+                    }
+
+                    const tagName = child.tagName.toLowerCase();
+
+                    if (htmlBlockedTags.includes(tagName)) {
+                        continue;
+                    }
+
+                    let cleanContent = cleanHtmlNode(child);
+                    const isBold = child.style.fontWeight === "bold" || parseInt(child.style.fontWeight) >= 700;
+                    const isItalic = child.style.fontStyle === "italic";
+
+                    if (isBold && !["strong", "b"].includes(tagName)) {
+                        cleanContent = `<strong>${cleanContent}</strong>`;
+                    }
+                    if (isItalic && !["em", "i"].includes(tagName)) {
+                        cleanContent = `<em>${cleanContent}</em>`;
+                    }
+
+                    if (!htmlAllowedTags.includes(tagName)) {
+                        result += cleanContent;
+                        continue;
+                    }
+
+                    if (tagName === "br") {
+                        result += "<br />";
+                        continue;
+                    }
+
+                    let finalTag = tagName;
+                    if (tagName === "b") finalTag = "strong";
+                    if (tagName === "i") finalTag = "em";
+                    const safeTableAttributes = getSafeTableAttributes(child, finalTag);
+
+                    if (finalTag === "table") {
+                        result += `<table>\n${cleanContent}</table>\n\n`;
+                    } else if (["thead", "tbody", "tfoot", "colgroup"].includes(finalTag)) {
+                        result += `  <${finalTag}${safeTableAttributes}>\n${cleanContent}  </${finalTag}>\n`;
+                    } else if (finalTag === "tr") {
+                        result += `    <tr>\n${cleanContent}    </tr>\n`;
+                    } else if (["th", "td"].includes(finalTag)) {
+                        result += `      <${finalTag}${safeTableAttributes}>${cleanContent}</${finalTag}>\n`;
+                    } else if (finalTag === "caption") {
+                        result += `  <caption>${cleanContent}</caption>\n`;
+                    } else if (finalTag === "col") {
+                        result += `    <col${safeTableAttributes} />\n`;
+                    } else if (["ul", "ol"].includes(finalTag)) {
+                        result += `<${finalTag}>\n${cleanContent}</${finalTag}>\n\n`;
+                    } else if (["p", "h1", "h2", "h3", "h4", "h5", "h6"].includes(finalTag)) {
+                        result += `<${finalTag}>${cleanContent}</${finalTag}>\n\n`;
+                    } else if (finalTag === "li") {
+                        result += `  <li>${cleanContent}</li>\n`;
+                    } else {
+                        result += `<${finalTag}>${cleanContent}</${finalTag}>`;
+                    }
+                }
+
+                return result;
+            }
+
+            return cleanHtmlNode(template.content).replace(/\n{3,}/g, "\n\n").trim();
+        }
+
+        document.getElementById("btn-html-clean").addEventListener("click", () => {
+            if (!htmlCodeInput.value.trim()) {
+                htmlCodeOutput.value = "";
+                showStatus("Chưa có mã HTML để làm sạch.", "red", "html-status");
+                return;
+            }
+
+            htmlCodeOutput.value = cleanHtmlCode(htmlCodeInput.value);
+            showStatus("Đã làm sạch mã HTML.", "green", "html-status");
+        });
+
+        document.getElementById("btn-html-clear").addEventListener("click", () => {
+            htmlCodeInput.value = "";
+            htmlCodeOutput.value = "";
+            showStatus("", "", "html-status");
+            htmlCodeInput.focus();
+        });
+
+        document.getElementById("btn-html-copy").addEventListener("click", () => {
+            if (!htmlCodeOutput.value) {
+                showStatus("Chưa có kết quả để copy.", "red", "html-status");
+                return;
+            }
+
+            navigator.clipboard.writeText(htmlCodeOutput.value).then(() => {
+                showStatus("Đã copy mã HTML đã làm sạch!", "green", "html-status");
+            }).catch(() => {
+                showStatus("Không thể tự động copy. Hãy chọn và copy thủ công.", "red", "html-status");
+            });
         });
     </script>
 </body>
