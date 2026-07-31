@@ -61,7 +61,7 @@
         </section>
 
         <section class="tab-panel" id="panel-html-code" role="tabpanel" aria-labelledby="tab-html-code" hidden>
-            <p class="note html-note">Dán mã HTML từ WordPress Code Editor vào ô bên dưới, sau đó bấm “Làm sạch mã HTML”. Mã gốc vẫn được giữ để bạn đối chiếu.</p>
+            <p class="note html-note">Dán mã HTML từ WordPress Code Editor vào ô bên dưới, sau đó bấm “Làm sạch mã HTML”. Mã gốc vẫn được giữ để bạn đối chiếu; cấu trúc bảng và các ô gộp cũng được bảo toàn.</p>
             <label class="field-label" for="htmlCodeInput">Mã HTML gốc</label>
             <textarea class="html-textarea" id="htmlCodeInput" spellcheck="false" placeholder="Dán mã HTML từ WordPress vào đây..."></textarea>
             <div class="btn-group">
@@ -221,7 +221,11 @@
 
         const htmlCodeInput = document.getElementById("htmlCodeInput");
         const htmlCodeOutput = document.getElementById("htmlCodeOutput");
-        const htmlAllowedTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'br', 'strong', 'b', 'i', 'em', 'ul', 'ol', 'li'];
+        const htmlAllowedTags = [
+            'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+            'p', 'br', 'strong', 'b', 'i', 'em', 'ul', 'ol', 'li',
+            'table', 'caption', 'colgroup', 'col', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td'
+        ];
         const htmlBlockedTags = ['script', 'style', 'iframe', 'object', 'embed', 'svg', 'math', 'template', 'noscript', 'head', 'meta', 'link', 'title', 'base'];
 
         function escapeHtmlText(text) {
@@ -229,6 +233,41 @@
                 .replace(/&/g, "&amp;")
                 .replace(/</g, "&lt;")
                 .replace(/>/g, "&gt;");
+        }
+
+        function getSafeTableAttributes(element, tagName) {
+            const safeAttributes = [];
+
+            function preserveNumericAttribute(name, minimum) {
+                const value = element.getAttribute(name);
+
+                if (value === null || !/^\d{1,4}$/.test(value)) {
+                    return;
+                }
+
+                const numericValue = Number(value);
+                if (numericValue >= minimum && numericValue <= 1000) {
+                    safeAttributes.push(`${name}="${numericValue}"`);
+                }
+            }
+
+            if (["th", "td"].includes(tagName)) {
+                preserveNumericAttribute("colspan", 1);
+                preserveNumericAttribute("rowspan", 0);
+            }
+
+            if (["col", "colgroup"].includes(tagName)) {
+                preserveNumericAttribute("span", 1);
+            }
+
+            if (tagName === "th") {
+                const scope = element.getAttribute("scope");
+                if (["row", "col", "rowgroup", "colgroup"].includes(scope)) {
+                    safeAttributes.push(`scope="${scope}"`);
+                }
+            }
+
+            return safeAttributes.length ? ` ${safeAttributes.join(" ")}` : "";
         }
 
         function cleanHtmlCode(sourceHtml) {
@@ -278,8 +317,21 @@
                     let finalTag = tagName;
                     if (tagName === "b") finalTag = "strong";
                     if (tagName === "i") finalTag = "em";
+                    const safeTableAttributes = getSafeTableAttributes(child, finalTag);
 
-                    if (["ul", "ol"].includes(finalTag)) {
+                    if (finalTag === "table") {
+                        result += `<table>\n${cleanContent}</table>\n\n`;
+                    } else if (["thead", "tbody", "tfoot", "colgroup"].includes(finalTag)) {
+                        result += `  <${finalTag}${safeTableAttributes}>\n${cleanContent}  </${finalTag}>\n`;
+                    } else if (finalTag === "tr") {
+                        result += `    <tr>\n${cleanContent}    </tr>\n`;
+                    } else if (["th", "td"].includes(finalTag)) {
+                        result += `      <${finalTag}${safeTableAttributes}>${cleanContent}</${finalTag}>\n`;
+                    } else if (finalTag === "caption") {
+                        result += `  <caption>${cleanContent}</caption>\n`;
+                    } else if (finalTag === "col") {
+                        result += `    <col${safeTableAttributes} />\n`;
+                    } else if (["ul", "ol"].includes(finalTag)) {
                         result += `<${finalTag}>\n${cleanContent}</${finalTag}>\n\n`;
                     } else if (["p", "h1", "h2", "h3", "h4", "h5", "h6"].includes(finalTag)) {
                         result += `<${finalTag}>${cleanContent}</${finalTag}>\n\n`;
